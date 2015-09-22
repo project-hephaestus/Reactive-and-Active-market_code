@@ -1,0 +1,184 @@
+// $id$
+//	Copyright (C) 2008 Battelle Memorial Institute
+
+// 4 Node Feeder: Unbalanced step-up grY-grY
+
+clock {
+	timestamp '2000-01-01 0:00:00';
+	timezone EST+5EDT;
+}
+module tape;
+module powerflow;
+module generators;
+
+object overhead_line_conductor:100 {
+	geometric_mean_radius 0.0244;
+	resistance 0.306;
+}
+
+object overhead_line_conductor:101 {
+	geometric_mean_radius 0.00814;
+	resistance 0.592;
+}
+
+object line_spacing:200 {
+	distance_AB 2.5;
+	distance_BC 4.5;
+	distance_AC 7.0;
+	distance_AN 5.656854;
+	distance_BN 4.272002;
+	distance_CN 5.0;
+}
+
+object line_configuration:300 {
+	conductor_A overhead_line_conductor:100;
+	conductor_B overhead_line_conductor:100;
+	conductor_C overhead_line_conductor:100;
+	conductor_N overhead_line_conductor:101;
+	spacing line_spacing:200;
+}
+
+object transformer_configuration:400 {
+	connect_type WYE_WYE;
+	power_rating 10;
+	primary_voltage 12470;
+	secondary_voltage 24900;
+	resistance 0.01;
+	reactance 0.06;
+}
+
+object transformer_configuration:500 {
+	connect_type WYE_WYE;
+	power_rating 28;
+	primary_voltage 24900;
+	secondary_voltage 12470;
+	resistance 0.01;
+	reactance 0.06;
+}
+
+object node:1 {
+	phases "ABCN";
+	voltage_A +7199.558+0.000j;
+	voltage_B -3599.779-6235.000j;
+	voltage_C -3599.779+6235.000j;
+	nominal_voltage 7200;
+}
+
+object overhead_line:12 {
+	phases "ABCN";
+	from node:1;
+	to node:2;
+	length 2000;
+	configuration line_configuration:300;
+}
+
+object node:2 {
+	phases "ABCN";
+	voltage_A +7199.558+0.000j;
+	voltage_B -3599.779-6235.000j;
+	voltage_C -3599.779+6235.000j;
+	nominal_voltage 7200;
+	    object multi_recorder {
+	             	property current_A;
+	             	file "wesss.csv";
+	             	interval 900;
+	             	limit 168;
+ 	};
+}
+
+object overhead_line:23 {
+	
+	phases "ABCN";
+	from node:2;
+	to node:3;
+	configuration line_configuration:300;
+}
+
+object node:3 {
+	phases "ABCN";
+	voltage_A +14376.022+0.000j;
+	voltage_B -7188.011-12450.000j;
+	voltage_C -7188.011+12450.000j;
+	nominal_voltage 14376;
+}
+
+
+object transformer:34 {
+	name transformer34;
+	phases "ABCN";
+	from node:3;
+	to meter44;
+	configuration transformer_configuration:400;
+}
+
+
+object transformer:45 {
+	name transformer45;
+	phases "ABCN";
+	from meter44;
+	to meter55;
+	configuration transformer_configuration:500;
+}
+
+object meter {
+        name meter44;
+        phases "ABCN";
+        voltage_A +14376.022+0.000j;
+   	voltage_B -7188.011-12450.000j;
+	voltage_C -7188.011+12450.000j;
+        nominal_voltage 14376;
+  
+}
+
+object meter {
+     name meter55;
+     phases "ABCN";
+     voltage_A 2401.7771;
+     voltage_B -1200.8886-2080.000j;
+     voltage_C -1200.8886+2080.000j;
+     nominal_voltage 2401.7771;
+  
+}
+
+object load:4 {
+	phases "ABCN";
+	voltage_A +14376.022+0.000j;
+	voltage_B -7188.011-12450.000j;
+	voltage_C -7188.011+12450.000j;
+	constant_power_A +10000;
+	//constant_power_B +1800000.000+871779.789j;
+	//constant_power_C +2375000.000+780624.750j;
+	maximum_voltage_error 0.001;
+	nominal_voltage 14376;
+}
+
+
+object diesel_dg {
+ name df;	
+ parent meter55; 	
+ Gen_mode CONSTANTPQ;	
+ Gen_status ONLINE;	
+ Gen_type SYNCHRONOUS;	
+ phases AS;	
+ pf 0.85;	
+ cylinders 1;	
+ stroke 2;
+ pressure 3;	
+ speed 360 1/min; 
+ torque 680 N;		 
+ time_operation 20 min;	
+ fuel 1.56 kg;	
+ w_coolingwater 160 kg;	
+ inlet_temperature 32 degC;	
+ outlet_temperature 57 degC;
+ air_fuel 30 kg;		 
+ room_temperature 27 degC;	
+ exhaust_temperature 310 degC;
+ cylinder_length 0.29 m;	
+ cylinder_radius 0.21 m;
+ brake_diameter 1 m;	
+ calotific_fuel 44000 kJ/kg;	
+ steam_exhaust 1.3 kg;
+ specific_heat_steam 2.093 kJ/kg/K;	
+ specific_heat_dry 1.01 kJ/kg/K;
+ }
